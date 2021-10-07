@@ -10,6 +10,39 @@ requirements to interact with their pump controllers. There is no guarantee that
 this utility will work under any circumstances, won't damage your controller
 or will work after firmware upgrades, etc.
 
+## Installation
+
+This package can be installed by ```pip```. Depending on the environment
+and operating system:
+
+```
+python -m pip install gammaionctl-tspspi
+```
+
+or simply
+
+```
+pip install gammaionctl-tspspi
+```
+
+In case one does not want to use ```pip``` one can also simply copy ```src/gammaionctl/gammaionctl.py```
+and import from this file. There are no additional dependencies for the library.
+
+### Uninstalling
+
+Uninstalling the package is also directly possible using ```pip``` if it has
+been installed that way:
+
+```
+python -m pip uninstall gammaionctl-tspspi
+```
+
+or
+
+```
+pip uninstall gammaionctl-tspspi
+```
+
 ## Library API
 
 The library exposes a single ```GammaIonPump``` class inside the ```gammactl```
