@@ -1,4 +1,4 @@
-# Gamma ion pump ethernet control CLI utility and library
+# Unofficial Gamma ion pump ethernet control CLI utility and library
 
 This is a mini Python 3 library and utility that exposes some of the functions
 of the Gamma Vacuum QPC ion pump controller via a CLI or via a library class
