@@ -107,7 +107,7 @@ Again the pump index has to be 1-4 for the quad pump controller.
 
 The method returns either:
 
-* the current in Millivolt as ```float```.
+* the current in Millivolts as ```float```.
 * ```None``` in case there is no measurement value (for example for a disabled pump)
 * ```False``` in case of a protocol violation. Then the connection has been dropped.
 
