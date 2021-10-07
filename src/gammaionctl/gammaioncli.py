@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import gammaionctl
+from gammaionctl import gammaionctl
 import time, sys
 
 def printUsage():
