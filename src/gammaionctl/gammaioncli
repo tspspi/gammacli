@@ -196,7 +196,7 @@ if host == None:
     sys.exit(1)
 
 try:
-    with gammactl.GammaIonPump(host) as pump:
+    with gammaionctl.GammaIonPump(host) as pump:
             skipArg = 0;
             for i in range(1, len(sys.argv)):
                 if skipArg > 0:
