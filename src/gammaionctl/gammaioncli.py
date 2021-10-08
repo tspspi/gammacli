@@ -1,34 +1,38 @@
 #!/usr/bin/env python3
+import time, sys
+import textwrap
 
 from gammaionctl import gammaionctl
-import time, sys
 
 def printUsage():
-    print("Gamma ion pump controller (QPC) remote control utility")
-    print("This is not an official tool and not associated with Gamma vacuum")
-    print("Find this tool online at: https://www.github.com/")
-    print("")
-    print("Usage:")
-    print("\t{} [settings] <commands>".format(sys.argv[0]))
-    print("")
-    print("Settings:")
-    print("\t--host ADDRESS\tSets the remote hostname or IP")
-    print("")
-    print("Commands (status, controller):")
-    print("\tid\t\tIdentifies the remote QPC")
-    print("")
-    print("Commands (status, per pump):")
-    print("\tpres N\t\tFetches pressure for pump N")
-    print("\tvolt N\t\tFetches voltage (in volts) for pump N")
-    print("\tcur N\t\tFetches current in milliamps for pump N")
-    print("\tsize N\t\tGets size of pump N in L/S")
-    print("\tstatus N\tGets current pump status (as on display)")
-    print("")
-    print("Commands (actions, per pump):")
-    print("\ton N\t\tEnabled pump N")
-    print("\toff N\t\tDisabled pump N")
-    print("Commands (actions, local):")
-    print("\tsleep N\tSleeps N seconds")
+    print(textwrap.dedent("""
+        Gamma ion pump controller (QPC) remote control utility
+        This is not an official tool and not associated with Gamma vacuum
+        Find this tool online at: https://www.github.com/
+
+        Usage:
+        \t{} [settings] <commands>".format(sys.argv[0]))
+
+        Settings:
+        \t--host ADDRESS\tSets the remote hostname or IP
+
+        Commands (status, controller):
+        \tid\t\tIdentifies the remote QPC
+
+        Commands (status, per pump):
+        \tpres N\t\tFetches pressure for pump N
+        \tvolt N\t\tFetches voltage (in volts) for pump N
+        \tcur N\t\tFetches current in milliamps for pump N
+        \tsize N\t\tGets size of pump N in L/S
+        \tstatus N\tGets current pump status (as on display)
+
+        Commands (actions, per pump):
+        \ton N\t\tEnabled pump N
+        \toff N\t\tDisabled pump N
+        Commands (actions, local):
+        \tsleep N\tSleeps N seconds
+        """))
+
 
 def gammaioncli():
     host = None
