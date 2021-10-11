@@ -51,7 +51,7 @@ class GammaIonPump:
             raise
 
         # Transmit command:
-        self.sock.send((command+"\r\n").encode())
+        self.sock.send(('spc '+command+"\r\n").encode())
 
         # Wait for reply and read till next prompt
         repl = ''
@@ -78,7 +78,7 @@ class GammaIonPump:
         if self.verbose:
             print("Requesting identity of pump controller")
 
-        res = self.sendCommand('spc 01')
+        res = self.sendCommand('01')
         if res == False:
             return False
 
@@ -89,7 +89,7 @@ class GammaIonPump:
         if self.verbose:
             print("Requesting pressure for pump {}".format(pumpIndex))
 
-        repl = self.sendCommand('spc 0B '+str(pumpIndex))
+        repl = self.sendCommand('0B '+str(pumpIndex))
 
         if repl == False:
             if self.verbose:
@@ -127,7 +127,7 @@ class GammaIonPump:
         if self.verbose:
             print("Request enabling pump {}".format(pumpIndex))
 
-        repl = self.sendCommand('spc 37 '+str(pumpIndex))
+        repl = self.sendCommand('37 '+str(pumpIndex))
         if self.verbose:
             if repl == False:
                 print("Enabling pump failed")
@@ -138,7 +138,7 @@ class GammaIonPump:
         if self.verbose:
             print("Request disabling pump {}".format(pumpIndex))
 
-        repl = self.sendCommand('spc 38 '+str(pumpIndex))
+        repl = self.sendCommand('38 '+str(pumpIndex))
         if self.verbose:
             if repl == False:
                 print("Disabling pump failed")
@@ -149,7 +149,7 @@ class GammaIonPump:
         if self.verbose:
             print("Requesting voltage for pump {}".format(pumpIndex))
 
-        repl = self.sendCommand('spc 0C '+str(pumpIndex))
+        repl = self.sendCommand('0C '+str(pumpIndex))
         if repl == False:
             if self.verbose:
                 print("Requesting voltage failed")
@@ -162,7 +162,7 @@ class GammaIonPump:
         if self.verbose:
             print("Requesting current for pump {}".format(pumpIndex))
 
-        repl = self.sendCommand('spc 0A '+str(pumpIndex))
+        repl = self.sendCommand('0A '+str(pumpIndex))
         if repl == False:
             if self.verbose:
                 print("Requesting current failed")
@@ -179,7 +179,7 @@ class GammaIonPump:
         if self.verbose:
             print("Requesting pump size for pump {}".format(pumpIndex))
 
-        repl = self.sendCommand('spc 11 '+str(pumpIndex))
+        repl = self.sendCommand('11 '+str(pumpIndex))
         if repl == False:
             if self.verbose:
                 print("Requesting pump size")
@@ -196,7 +196,7 @@ class GammaIonPump:
         if self.verbose:
             print("Requesting supply status for pump {}".format(pumpIndex))
 
-        repl = self.sendCommand('spc 0D '+str(pumpIndex))
+        repl = self.sendCommand('0D '+str(pumpIndex))
         if repl == False:
             if self.verbose:
                 print("Requesting pump size")
