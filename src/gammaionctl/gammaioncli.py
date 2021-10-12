@@ -31,7 +31,7 @@ def printUsage():
         \toff N\t\tDisabled pump N
         Commands (actions, local):
         \tsleep N\tSleeps N seconds
-        """))
+        """).format(sys.argv[0]))
 
 
 def gammaioncli():
@@ -277,3 +277,6 @@ def gammaioncli():
                         skipArg = 1
     except Exception as e:
         pass
+
+if __name__ == "__main__":
+    gammaioncli()
