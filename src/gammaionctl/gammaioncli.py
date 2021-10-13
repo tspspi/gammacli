@@ -11,7 +11,7 @@ def printUsage():
         Find this tool online at: https://www.github.com/
 
         Usage:
-        \t{} [settings] <commands>".format(sys.argv[0]))
+        \t{} [settings] <commands>
 
         Settings:
         \t--host ADDRESS\tSets the remote hostname or IP
