@@ -34,14 +34,14 @@ class GammaIonPump:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if self.sock != False:
+        if self.sock:
             if self.verbose:
                 print("Closing socket connection")
             self.sock.close()
             self.sock = False
 
     def close(self):
-        if self.sock != False:
+        if self.sock:
             if self.verbose:
                 print("Closing socket connection")
             self.sock.close()
@@ -50,7 +50,7 @@ class GammaIonPump:
     def sendCommand(self, command):
         if self.verbose:
             print("Sending command {}".format(command))
-        if self.sock == False:
+        if not self.sock:
             if self.verbose:
                 print("Pump controller not connected")
             raise ConnectionError("Failed to Connect to ion pump:\
@@ -74,9 +74,9 @@ class GammaIonPump:
             repl = repl + chunk.decode("utf-8")
 
         repl = repl.strip('>\n ')
-        if repl.split(' ')[0] != "OK":
+        if not repl.startswith("OK"):
             if self.verbose:
-                print("Received error {}".format(repl))
+                print(f"Received error {repl}")
             return False
 
         return repl
@@ -86,7 +86,7 @@ class GammaIonPump:
             print("Requesting identity of pump controller")
 
         res = self.sendCommand('01')
-        if res == False:
+        if res is False:
             return False
 
         # Parse result
@@ -105,14 +105,14 @@ class GammaIonPump:
 
         repl = self.sendCommand('0B '+str(pumpIndex))
 
-        if repl == False:
+        if repl is False:
             if self.verbose:
                 print("Failed to receive pressure information")
             return False
 
         repl = repl.split(" ")
 
-        if(len(repl) < 4):
+        if len(repl) < 4:
             if self.verbose:
                 print("Failed to read response from GammaQPC")
             return False
@@ -150,10 +150,10 @@ class GammaIonPump:
 
         repl = self.sendCommand('37 '+str(pumpIndex))
         if self.verbose:
-            if repl == False:
+            if repl is False:
                 print("Enabling pump failed")
 
-        return repl != False
+        return repl is not False
 
     def disable(self, pumpIndex):
         if self.verbose:
@@ -161,17 +161,17 @@ class GammaIonPump:
 
         repl = self.sendCommand('38 '+str(pumpIndex))
         if self.verbose:
-            if repl == False:
+            if repl is False:
                 print("Disabling pump failed")
 
-        return repl != False
+        return repl is not False
 
     def getVoltage(self, pumpIndex):
         if self.verbose:
             print("Requesting voltage for pump {}".format(pumpIndex))
 
         repl = self.sendCommand('0C '+str(pumpIndex))
-        if repl == False:
+        if repl is False:
             if self.verbose:
                 print("Requesting voltage failed")
             return None
@@ -184,7 +184,7 @@ class GammaIonPump:
             print("Requesting current for pump {}".format(pumpIndex))
 
         repl = self.sendCommand('0A '+str(pumpIndex))
-        if repl == False:
+        if repl is False:
             if self.verbose:
                 print("Requesting current failed")
             return None
@@ -201,7 +201,7 @@ class GammaIonPump:
             print("Requesting pump size for pump {}".format(pumpIndex))
 
         repl = self.sendCommand('11 '+str(pumpIndex))
-        if repl == False:
+        if repl is False:
             if self.verbose:
                 print("Requesting pump size")
             return None
@@ -214,21 +214,28 @@ class GammaIonPump:
         return float(repl[2].strip())
 
     def getHighVoltageStatus(self, pumpIndex):
+        '''Reads ion pump high voltages status
+
+        Returns:
+            - True or False if it's on or off
+            - None if the pump's response was neither or the reply was empty
+        '''
         if self.verbose:
             print("Requesting if high voltage is enabled for pump {}".format(pumpIndex))
-        
+
         repl = self.sendCommand(f"61 {pumpIndex}")
-        if repl == False:
+        if repl is False:
             if self.verbose:
                 print("Request if high voltage is enabled failed")
             return None
 
-        repl = repl.split(" ")
-        status = None
-        if repl[-1].strip() == "YES":
+        repl = repl.strip()
+        if repl.endswith("YES"):
             status = True
-        elif repl[-1].strip() == "NO":
+        elif repl.endswith("NO"):
             status = False
+        else:
+            return None
 
         if self.verbose and status is not None:
             print(f"High voltage {'is' if status else 'is not'} on")
@@ -240,7 +247,7 @@ class GammaIonPump:
             print("Requesting supply status for pump {}".format(pumpIndex))
 
         repl = self.sendCommand('0D '+str(pumpIndex))
-        if repl == False:
+        if repl is False:
             if self.verbose:
                 print("Requesting pump size")
             return None
