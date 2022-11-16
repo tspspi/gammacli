@@ -1,15 +1,20 @@
 import socket
 
 class GammaIonPump:
-    def __init__(self, host):
+    def __init__(self, host, timeout=2, connection=None):
         self.sock = False
         self.host = host
-
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(2)
-        self.sock.connect((host, 23))
-
         self.verbose = False
+
+        if host is not None:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(timeout)
+            self.sock.connect((host, 23))
+        elif connection is not None:
+            self.sock = connection
+        else:
+            raise ConnectionError("Failed to Connect to ion pump:\
+                                              No host or connection provided")
 
         # Wait for initial prompt
         while True:
@@ -17,10 +22,10 @@ class GammaIonPump:
             if chunk == b'':
                 self.sock.close()
                 self.sock = False
-                raise
+                raise ConnectionError("Failed to Connect to ion pump:\
+                                Failed to connect to pump at specified IP")
             if chunk.decode("utf-8") == ">":
                 break
-
 
     def setVerbose(self, verboseState):
         self.verbose = verboseState
@@ -48,7 +53,8 @@ class GammaIonPump:
         if self.sock == False:
             if self.verbose:
                 print("Pump controller not connected")
-            raise
+            raise ConnectionError("Failed to Connect to ion pump:\
+                                            Pump controller not connected")
 
         # Transmit command:
         self.sock.send(('spc '+command+"\r\n").encode())
@@ -63,11 +69,12 @@ class GammaIonPump:
                 self.sock.close()
                 self.sock = False
                 return False
-            if chunk.decode("utf-8") == ">":
+            if repl.endswith('\r\r'):
                 break
             repl = repl + chunk.decode("utf-8")
 
-        if repl[0:2] != "OK":
+        repl = repl.strip('>\n ')
+        if repl.split(' ')[0] != "OK":
             if self.verbose:
                 print("Received error {}".format(repl))
             return False
@@ -85,7 +92,14 @@ class GammaIonPump:
         # Parse result
         return res[6:].strip()
 
-    def getPressure(self, pumpIndex):
+    def getPressureWithUnits(self, pumpIndex):
+        '''Reads ion pump pressure
+
+        Returns:
+            tuple (pressure, units) or
+            False if there was a communication error or
+            None if the pump is disabled or unavailable
+        '''
         if self.verbose:
             print("Requesting pressure for pump {}".format(pumpIndex))
 
@@ -103,25 +117,32 @@ class GammaIonPump:
                 print("Failed to read response from GammaQPC")
             return False
 
-        if(repl[0] != "OK"):
-            if self.verbose:
-                print("Failed to read response from GammaQPC")
-            return False
-
-        if(repl[3] != 'MBAR\r\r\n'):
-            if self.verbose:
-                print("Gamma QPC not set to MBAR")
-            return False
+        units = repl[3].strip()
+        if self.verbose:
+            print(f"Gamma QPC set to {units}")
 
         pressure = float(repl[2])
         if pressure == 1.3e-11:
             if self.verbose:
                 print("Pump disabled or unavailable")
-            return None
-        else:
+            pressure = None
+
+        if self.verbose:
+            print(f"Received {pressure} {units}")
+        return pressure, units
+    
+    def getPressure(self, pumpIndex, require_units='mBar'):
+        '''Returns pump pressure in requred units'''
+        response = self.getPressureWithUnits(pumpIndex)
+        if not isinstance(response, tuple):
+            return response
+        pressure, units = response
+
+        if units.lower() != require_units.lower():
             if self.verbose:
-                print("Received {} mbar".format(pressure))
-            return pressure
+                print(f"Gamma QPC not set to {require_units}")
+            return False
+        return pressure
 
     def enable(self, pumpIndex):
         if self.verbose:
@@ -173,7 +194,7 @@ class GammaIonPump:
             if self.verbose:
                 print("Failed to decode QPC reply, unit was "+repl[3])
             return None
-        return float(repl[2].strip())*1000.0
+        return float(repl[2].strip())
 
     def getPumpSize(self, pumpIndex):
         if self.verbose:
@@ -192,6 +213,28 @@ class GammaIonPump:
             return None
         return float(repl[2].strip())
 
+    def getHighVoltageStatus(self, pumpIndex):
+        if self.verbose:
+            print("Requesting if high voltage is enabled for pump {}".format(pumpIndex))
+        
+        repl = self.sendCommand(f"61 {pumpIndex}")
+        if repl == False:
+            if self.verbose:
+                print("Request if high voltage is enabled failed")
+            return None
+
+        repl = repl.split(" ")
+        status = None
+        if repl[-1].strip() == "YES":
+            status = True
+        elif repl[-1].strip() == "NO":
+            status = False
+
+        if self.verbose and status is not None:
+            print(f"High voltage {'is' if status else 'is not'} on")
+
+        return status
+
     def getSupplyStatus(self, pumpIndex):
         if self.verbose:
             print("Requesting supply status for pump {}".format(pumpIndex))
@@ -202,4 +245,4 @@ class GammaIonPump:
                 print("Requesting pump size")
             return None
 
-        return repl[6:-2].strip()
+        return repl[6:].strip()
